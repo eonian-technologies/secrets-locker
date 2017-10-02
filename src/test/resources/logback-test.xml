@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<configuration scan="true" scanPeriod="3 seconds">
+
+    <contextName>secrets-locker-unit-tests</contextName>
+
+    <!-- Console appender (server log) -->
+    <appender name="console" class="ch.qos.logback.core.ConsoleAppender">
+        <encoder>
+            <charset>UTF-8</charset>
+            <pattern>%d{MMM dd yyyy HH:mm:ss.SSS} ${HOSTNAME} %contextName %C %M | %X%n%p: [%t] %m%n%n</pattern>
+        </encoder>
+    </appender>
+
+    <root level="WARN">
+        <appender-ref ref="console" />
+    </root>
+
+    <logger name="com.amazonaws" level="WARN" />
+</configuration>
