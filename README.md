@@ -7,18 +7,8 @@ The Eonian Secrets Locker provides in-app decryption of encrypted secrets at run
 <dependency>
     <groupId>com.eoniantech</groupId>
     <artifactId>secrets-locker</artifactId>
-    <version>1.1-SNAPSHOT</version>
+    <version>1.1</version>
 </dependency>
-```
-
-### Snapshots Repository
-```
-<repository>
-    <id>oss-snapshots-repo</id>
-    <url>https://oss.sonatype.org/content/repositories/snapshots</url>
-    <releases><enabled>false</enabled></releases>
-    <snapshots><enabled>true</enabled></snapshots>
-</repository>
 ```
 
 ### Using The AWS KMS Provider
@@ -141,4 +131,15 @@ public class MySpringConfigurationClass {
 
 ### Best Practices
 * Do not call `get` on the same secret multiple times. Each call will result in decryption. Instead, call `get` once and keep a reference to the object.
+
+### Snapshots Repository
+```
+<repository>
+    <id>oss-snapshots-repo</id>
+    <url>https://oss.sonatype.org/content/repositories/snapshots</url>
+    <releases><enabled>false</enabled></releases>
+    <snapshots><enabled>true</enabled></snapshots>
+</repository>
+```
+
 
