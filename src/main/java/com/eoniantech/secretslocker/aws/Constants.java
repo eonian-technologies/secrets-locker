@@ -38,7 +38,7 @@ interface Constants {
     static final String NAMES = "names";
     static final String LOCKER_PATH = "lockerPath";
     static final String ACCOUNT_ID = "accountId";
-    static final String KEY_ID = "keyAlias";
+    static final String ALIAS = "alias";
     static final String REGIONS = "regions";
     static final String REGION = "region";
     static final String FILE_NAME = "fileName";
