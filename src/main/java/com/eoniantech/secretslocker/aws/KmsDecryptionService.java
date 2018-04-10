@@ -19,7 +19,6 @@ import com.amazonaws.auth.DefaultAWSCredentialsProviderChain;
 import com.amazonaws.encryptionsdk.AwsCrypto;
 import com.amazonaws.encryptionsdk.CryptoInputStream;
 import com.amazonaws.encryptionsdk.kms.KmsMasterKeyProvider;
-import com.amazonaws.regions.Region;
 import com.amazonaws.util.IOUtils;
 import com.eoniantech.secretslocker.DecryptionService;
 import com.eoniantech.secretslocker.DecryptionService.DecryptionException;
