@@ -19,6 +19,8 @@ import com.amazonaws.auth.DefaultAWSCredentialsProviderChain;
 import com.amazonaws.encryptionsdk.AwsCrypto;
 import com.amazonaws.encryptionsdk.CryptoInputStream;
 import com.amazonaws.encryptionsdk.kms.KmsMasterKeyProvider;
+import com.amazonaws.regions.Region;
+import com.amazonaws.regions.Regions;
 import com.amazonaws.util.IOUtils;
 import com.eoniantech.secretslocker.DecryptionService;
 import com.eoniantech.secretslocker.DecryptionService.DecryptionException;
@@ -80,9 +82,19 @@ public final class KmsDecryptionService implements DecryptionService {
     }
 
     private void setKmsMasterKeyProvider() {
+        Region region 
+                = Regions.getCurrentRegion(); 
+
+        String regionName 
+                = (region == null) 
+                        ? null 
+                        : region.getName(); 
+
         this.kmsMasterKeyProvider 
                 = KmsMasterKeyProvider
                         .builder()
+                        .withDefaultRegion(
+                                regionName)
                         .build();
     } 
 
