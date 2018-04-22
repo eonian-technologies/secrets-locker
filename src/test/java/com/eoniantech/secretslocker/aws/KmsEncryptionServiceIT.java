@@ -29,7 +29,7 @@ import org.junit.runner.RunWith;
 public class KmsEncryptionServiceIT {
 
     static final String KMS_KEY_ALIAS
-            = "alias/secrets-locker";
+            = "alias/secrets-locker2";
 
     static final String[] KMS_KEY_REGIONS
             = {"us-east-1", "us-west-2", "eu-west-1"}; 
