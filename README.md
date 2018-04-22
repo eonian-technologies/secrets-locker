@@ -21,7 +21,7 @@ The [mrcrypt](https://github.com/aol/mrcrypt) command-line tool encrypts secrets
 ```
 $ mrcrypt encrypt -r us-east-1 us-west-2 eu-west-1 -- alias/mykey secret.txt
 ```
-Because `mrcrypt` follows the AWS Encryption SDK's message format, the resulting file called `secret.txt.encrypted` can be decrypted by the Eonian Secrets Locker from each of the regions specified. As when encrypting, AWS credentials with permission to decrypt using each of the KMS CMK must be found in the credentials chain. You can not encrypt for three regions, and then decrypt using credentials that only have permission for one of the regions. To decrypt the file, you have to have rights to decrypt from all three regions.
+Because `mrcrypt` follows the AWS Encryption SDK's message format, the resulting file called `secret.txt.encrypted` can be decrypted by the Eonian Secrets Locker from each of the regions specified. When decrypting, AWS credentials with permission to decrypt using the regional CMK must be found in the credentials chain.
 
 #### Decrypting Secrets
 There are several types of in-app lockers. Choose the Secrets Locker that best fits your use case.
