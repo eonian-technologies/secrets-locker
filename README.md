@@ -1,5 +1,7 @@
 ## Eonian Secrets Locker
-The Eonian Secrets Locker provides in-app decryption of encrypted secrets at runtime. Encrypted secrets can be on the class path, the file system, or in AWS S3. Secrets are decrypted into Java Strings or Properties. Their plaintext is not written to disk. The library provides interfaces which can be implemented by different encryption providers. Currently the only provider is AWS KMS via the AWS Encryption SDK.
+The Eonian Secrets Locker provides in-app decryption of encrypted secrets at runtime. Encrypted secrets can be on the class path, the file system, or in AWS S3. Secrets are decrypted into Java Strings or Properties. Their plaintext is not written to disk. The library provides interfaces which can be implemented by different encryption providers. 
+
+**Currently the only implemented provider is AWS KMS via the AWS Encryption SDK.**
 
 
 ### Maven Dependency
@@ -7,7 +9,7 @@ The Eonian Secrets Locker provides in-app decryption of encrypted secrets at run
 <dependency>
     <groupId>com.eoniantech</groupId>
     <artifactId>secrets-locker</artifactId>
-    <version>1.1</version>
+    <version>1.2</version>
 </dependency>
 ```
 
