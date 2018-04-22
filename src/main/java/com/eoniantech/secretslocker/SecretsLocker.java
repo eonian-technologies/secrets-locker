@@ -22,7 +22,7 @@ import java.util.Properties;
  * details of adding encrypted secrets to the locker and retrieving their
  * decrypted value is implementation-specific.
  * 
- * @author Michael Andrews <Michael.Andrews@eoniantech.com>
+ * @author Michael.Andrews@eoniantech.com
  * @since 1.0
  */
 public interface SecretsLocker {

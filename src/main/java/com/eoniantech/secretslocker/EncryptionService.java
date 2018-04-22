@@ -21,7 +21,7 @@ import java.io.File;
  * Interface for an encryption service. The exact details on how files and 
  * values are encrypted are implementation-specific.
  * 
- * @author Michael Andrews <Michael.Andrews@eoniantech.com>
+ * @author Michael.Andrews@eoniantech.com
  * @since 1.0
  */
 public interface EncryptionService {

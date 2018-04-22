@@ -22,7 +22,7 @@ import com.eoniantech.secretslocker.SecretsLocker;
  * exist in the specified local directory. The directory must exist and be 
  * readable.
  * 
- * @author Michael Andrews <Michael.Andrews@eoniantech.com>
+ * @author Michael.Andrews@eoniantech.com
  * @since 1.0
  */
 public class FileSystemSecretsLocker extends AbtractFileSystemSecretsLocker {

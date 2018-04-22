@@ -51,7 +51,7 @@ import static com.eoniantech.secretslocker.aws.Constants.SUFFIX;
  * envelope encryption. AWS credentials are required. KMS keys with the same
  * alias must be created in each of the desired regions.
  *
- * @author Michael Andrews <Michael.Andrews@eoniantech.com>
+ * @author Michael.Andrews@eoniantech.com
  * @since 1.0
  * @see DefaultAWSCredentialsProviderChain
  */

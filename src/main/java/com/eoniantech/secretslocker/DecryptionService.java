@@ -21,7 +21,7 @@ import java.io.File;
  * Interface for a decryption service. The exact details on how files and 
  * values are decrypted are implementation-specific.
  * 
- * @author Michael Andrews <Michael.Andrews@eoniantech.com>
+ * @author Michael.Andrews@eoniantech.com
  * @since 1.0
  */
 public interface DecryptionService {

@@ -40,7 +40,7 @@ import static com.eoniantech.secretslocker.aws.Constants.SECRET_NOT_FOUND;
  * Encrypted secrets do not need to exists locally and are only downloaded
  * when needed. AWS credentials are required.
  * 
- * @author Michael Andrews <Michael.Andrews@eoniantech.com>
+ * @author Michael.Andrews@eoniantech.com
  * @since 1.0
  * @see DefaultAWSCredentialsProviderChain
  */

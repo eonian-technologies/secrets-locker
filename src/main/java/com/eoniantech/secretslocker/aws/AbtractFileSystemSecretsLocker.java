@@ -39,7 +39,7 @@ import static com.eoniantech.secretslocker.aws.Constants.SECRET_NOT_FOUND;
  * Abstract base class for file system backed {@link SecretsLocker} 
  * implementations.
  * 
- * @author Michael Andrews <Michael.Andrews@eoniantech.com>
+ * @author Michael.Andrews@eoniantech.com
  * @since 1.0
  * @see ClassPathSecretsLocker
  * @see FileSystemSecretsLocker
@@ -205,8 +205,7 @@ abstract class AbtractFileSystemSecretsLocker implements SecretsLocker {
     }
 
     /**
-     * @return {@code true} if files should be validated, otherwise 
-     * {@code false).
+     * @return True if files should be validated, otherwise false.
      */
     protected boolean validateFiles() {
         return validateFiles; 

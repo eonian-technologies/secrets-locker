@@ -21,7 +21,7 @@ import static com.eoniantech.secretslocker.aws.Constants.IS_REQUIRED_PATTERN;
 /**
  * Class containing methods for argument assertions.
  *
- * @author Michael Andrews <Michael.Andrews@eoniantech.com>
+ * @author Michael.Andrews@eoniantech.com
  * @since 1.0
  */
 abstract class Assertions {

@@ -19,7 +19,7 @@ package com.eoniantech.secretslocker.aws;
  * Interface containing constants. Do not implement this class. Use static 
  * imports instead.
  * 
- * @author Michael Andrews <Michael.Andrews@eoniantech.com>
+ * @author Michael.Andrews@eoniantech.com
  * @since 1.0
  */
 interface Constants {

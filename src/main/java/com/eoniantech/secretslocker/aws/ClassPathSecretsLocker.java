@@ -29,7 +29,7 @@ import java.net.URL;
  * Implementation of {@link SecretsLocker} that requires each secret to exist 
  * on the class path.
  * 
- * @author Michael Andrews <Michael.Andrews@eoniantech.com>
+ * @author Michael.Andrews@eoniantech.com
  * @since 1.0
  */
 public final class ClassPathSecretsLocker 
