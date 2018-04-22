@@ -29,7 +29,7 @@ import org.junit.runner.RunWith;
 public class S3SecretsLockerIT {
 
     static final String S3_BUCKET_NAME
-            = "com-eoniantech-secrets";
+            = "eoniantech-secrets";
 
     static final String S3_BUCKET_PATH
             = "secrets-locker";

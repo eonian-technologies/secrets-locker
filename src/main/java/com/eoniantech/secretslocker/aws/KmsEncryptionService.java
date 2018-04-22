@@ -15,34 +15,33 @@
  */
 package com.eoniantech.secretslocker.aws;
 
-import com.amazonaws.ClientConfiguration;
-import com.amazonaws.auth.AWSCredentialsProvider;
 import com.amazonaws.auth.DefaultAWSCredentialsProviderChain;
 import com.amazonaws.encryptionsdk.AwsCrypto;
 import com.amazonaws.encryptionsdk.CryptoOutputStream;
 import com.amazonaws.encryptionsdk.MasterKeyProvider;
-import com.amazonaws.encryptionsdk.kms.KmsMasterKey;
 import com.amazonaws.encryptionsdk.kms.KmsMasterKeyProvider;
 import com.amazonaws.encryptionsdk.multi.MultipleProviderFactory;
-import com.amazonaws.regions.Region;
 import com.amazonaws.regions.Regions;
+import com.amazonaws.services.securitytoken.AWSSecurityTokenService;
+import com.amazonaws.services.securitytoken.AWSSecurityTokenServiceClientBuilder;
+import com.amazonaws.services.securitytoken.model.GetCallerIdentityRequest;
+import com.amazonaws.services.securitytoken.model.GetCallerIdentityResult;
 import com.amazonaws.util.IOUtils;
 import com.eoniantech.secretslocker.EncryptionService;
 import com.eoniantech.secretslocker.EncryptionService.EncryptionException;
-import static com.eoniantech.secretslocker.aws.Assertions.assertArgumentNotNull;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
-import java.io.IOException;
 import java.util.LinkedList;
 import java.util.List;
 import static com.eoniantech.secretslocker.aws.Assertions.assertArgumentNotEmpty;
+import static com.eoniantech.secretslocker.aws.Assertions.assertArgumentNotNull;
+import static com.eoniantech.secretslocker.aws.Constants.ALIAS;
 import static com.eoniantech.secretslocker.aws.Constants.DIRECTORY_IS_NOT_READABLE;
 import static com.eoniantech.secretslocker.aws.Constants.FILE_DOES_NOT_EXIST_PATTERN;
 import static com.eoniantech.secretslocker.aws.Constants.FILE_IS_NOT_A_NORMAL_FILE_PATTERN;
 import static com.eoniantech.secretslocker.aws.Constants.FILE_IS_NOT_READABLE_PATTERN;
 import static com.eoniantech.secretslocker.aws.Constants.INVALID_REGION_PATTERN;
-import static com.eoniantech.secretslocker.aws.Constants.KEY_ID;
 import static com.eoniantech.secretslocker.aws.Constants.REGION;
 import static com.eoniantech.secretslocker.aws.Constants.REGIONS;
 import static com.eoniantech.secretslocker.aws.Constants.SUFFIX;
@@ -51,28 +50,33 @@ import static com.eoniantech.secretslocker.aws.Constants.SUFFIX;
  * Implementation of {@link EncryptionService} that uses AWS KMS Multi-region
  * envelope encryption. AWS credentials are required. KMS keys with the same
  * alias must be created in each of the desired regions.
- * 
+ *
  * @author Michael Andrews <Michael.Andrews@eoniantech.com>
  * @since 1.0
  * @see DefaultAWSCredentialsProviderChain
  */
 public final class KmsEncryptionService implements EncryptionService {
 
-    private String keyId;
+    private static final String ALIAS_ARN_FORMAT 
+            = "arn:aws:kms:%s:%s:%s"; 
+
+    private String alias;
     private String[] regions;
+    private String account;
 
     /**
      * Constructor.
-     *
-     * @param keyId the ID of the key
-     * @param regions the regions to use
+     * *
+     * @param alias The alias that exists in all the regions. E.g., alias/myKey
+     * @param regions The regions where the alias exists.
      */
     public KmsEncryptionService(
-            final String keyId,
+            final String alias,
             final String... regions) {
 
-        setKeyId(keyId);
+        setAlias(alias);
         setRegions(regions);
+        setAccountId();
     }
 
     /**
@@ -87,13 +91,15 @@ public final class KmsEncryptionService implements EncryptionService {
      * {@inheritDoc }
      */
     @Override
-    public File encryptFile(final File file) {
+    public File encryptFile(
+            final File file) {
+        
         if (!file.exists())
             throw new IllegalArgumentException(
                     String.format(
                             FILE_DOES_NOT_EXIST_PATTERN,
                             file.getAbsolutePath()));
-        
+
         if (!file.isFile())
             throw new IllegalArgumentException(
                     String.format(
@@ -103,8 +109,8 @@ public final class KmsEncryptionService implements EncryptionService {
         if (!file.canRead())
             throw new IllegalArgumentException(
                     String.format(
-                        FILE_IS_NOT_READABLE_PATTERN, 
-                        file.getAbsolutePath()));
+                            FILE_IS_NOT_READABLE_PATTERN,
+                            file.getAbsolutePath()));
 
         if (!file.getParentFile().canWrite()) 
             throw new IllegalArgumentException(
@@ -126,22 +132,22 @@ public final class KmsEncryptionService implements EncryptionService {
                 = new FileInputStream(file);
 
                 final FileOutputStream fileOutputStram 
-                        = new FileOutputStream(
-                                encryptedFile);
+                    = new FileOutputStream(
+                        encryptedFile);
 
                 final CryptoOutputStream<?> encryptingStream
                         = awsCrypto
-                               .createEncryptingStream(
-                                       masterKeyProvider(),
+                                .createEncryptingStream(
+                                        masterKeyProvider(),
                                        fileOutputStram)) {
 
             IOUtils.copy(
                     fileInputStream,
                     encryptingStream);
 
-        } catch (IOException exception) {
+        } catch (Exception exception) {
             throw new EncryptionException(exception);
-        } 
+        }
 
         return encryptedFile;
     }
@@ -150,79 +156,106 @@ public final class KmsEncryptionService implements EncryptionService {
      * {@inheritDoc }
      */
     @Override
-    public String encryptValue(final String value) {
-        throw new UnsupportedOperationException("Not supported yet."); 
+    public String encryptValue(
+            final String value) {
+        
+        throw new UnsupportedOperationException("Not supported yet.");
     }
 
     private MasterKeyProvider<?> masterKeyProvider() {
 
-        final AWSCredentialsProvider credentials
-                = new DefaultAWSCredentialsProviderChain();
-
-        List<KmsMasterKey> masterKeys
+        List<KmsMasterKeyProvider> kmsMasterKeyProviders 
                 = new LinkedList<>();
 
-        for (String region : this.regions) {
-            KmsMasterKeyProvider provider
-                    = new KmsMasterKeyProvider(
-                            credentials,
-                            Region.getRegion(
-                                    Regions.fromName(
-                                            region)),
-                            new ClientConfiguration(),
-                            this.keyId);
-
-
-
-            masterKeys.add(
-                    provider.getMasterKey(
-                            this.keyId));
-        }
+        for (String region : regions()) { 
+            kmsMasterKeyProviders.add(
+                    KmsMasterKeyProvider
+                            .builder() 
+                            .withKeysForEncryption(
+                                    String.format(
+                                            ALIAS_ARN_FORMAT, 
+                                            region,
+                                            account(),
+                                            alias()))
+                            .build());
+        } 
 
         return MultipleProviderFactory
                 .buildMultiProvider(
-                        masterKeys);
+                        kmsMasterKeyProviders);
     }
 
-    private void setKeyId(
-            final String keyId) {
+    private void setAlias(
+            final String alias) {
 
         assertArgumentNotEmpty(
-                KEY_ID,
-                keyId);
+                ALIAS,
+                alias);
 
-        this.keyId = keyId;
+        this.alias 
+                = alias;
     }
 
     private void setRegions(
             final String... regions) {
-        
+
         assertArgumentNotEmpty(
-                REGIONS, 
+                REGIONS,
                 regions);
 
         for (String region : regions)
             validateRegion(region);
 
-        this.regions = regions;
+        this.regions 
+                = regions;
     }
 
     private void validateRegion(
             final String region) {
 
         assertArgumentNotNull(
-                REGION, 
+                REGION,
                 region);
 
         try {
             Regions.fromName(region);
-            
-        } catch (IllegalArgumentException illegalArgumentException) {
+
+        } catch (IllegalArgumentException exception) {
             throw new IllegalArgumentException(
                     String.format(
-                            INVALID_REGION_PATTERN, 
-                            region), 
-                    illegalArgumentException);
-        } 
+                            INVALID_REGION_PATTERN,
+                            region),
+                    exception);
+        }
+    }
+
+    private void setAccountId() {
+        AWSSecurityTokenService stsService 
+                = AWSSecurityTokenServiceClientBuilder
+                        .standard()
+                        .withCredentials(
+                                new DefaultAWSCredentialsProviderChain())
+                        .build();
+
+        GetCallerIdentityResult callerIdentity 
+                = stsService
+                        .getCallerIdentity(
+                                new GetCallerIdentityRequest());
+
+        this.account 
+                = callerIdentity
+                        .getAccount();
+    }
+
+    private String alias() {
+        return alias;
+    }
+
+    private String[] regions() {
+        return regions;
+    }
+
+    private String account() {
+        return account;
     }
 }

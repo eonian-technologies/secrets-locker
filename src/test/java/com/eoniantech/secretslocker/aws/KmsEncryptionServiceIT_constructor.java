@@ -25,7 +25,7 @@ import org.junit.Test;
  * @author Michael Andrews <Michael.Andrews@eoniantech.com>
  * @since 1.0
  */
-public class KmsEncryptionServiceTest_constructor extends AbstractTest {
+public class KmsEncryptionServiceIT_constructor extends AbstractTest {
 
     @SuppressWarnings("unused")
     private EncryptionService encryptionService;

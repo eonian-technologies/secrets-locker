@@ -45,7 +45,7 @@ public class S3SecretsLockerIT_constructor extends AbstractTest {
     public void testS3SecretsLocker_invalidBucketName() {
          secretsLocker
                 = new S3SecretsLocker(
-                        "does-not-exists",
+                        "asdjsjldsd",
                         S3_BUCKET_PATH,
                         LOCAL_LOCKER);
     } 

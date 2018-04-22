@@ -19,6 +19,8 @@ import com.amazonaws.auth.DefaultAWSCredentialsProviderChain;
 import com.amazonaws.encryptionsdk.AwsCrypto;
 import com.amazonaws.encryptionsdk.CryptoInputStream;
 import com.amazonaws.encryptionsdk.kms.KmsMasterKeyProvider;
+import com.amazonaws.regions.Region;
+import com.amazonaws.regions.Regions;
 import com.amazonaws.util.IOUtils;
 import com.eoniantech.secretslocker.DecryptionService;
 import com.eoniantech.secretslocker.DecryptionService.DecryptionException;
@@ -31,35 +33,70 @@ import java.io.IOException;
  * Implementation of {@link DecryptionService} that uses AWS KMS Multi-region
  * envelope decryption. AWS credentials are required. KMS keys with the same
  * alias must be created in each of the desired regions.
- * 
+ *
  * @author Michael Andrews <Michael.Andrews@eoniantech.com>
  * @since 1.0
  * @see DefaultAWSCredentialsProviderChain
  */
 public final class KmsDecryptionService implements DecryptionService {
-   
+
     /**
      * Singleton holder.
      */
     private static class Holder {
-        public static final KmsDecryptionService INSTANCE 
+        public static final KmsDecryptionService INSTANCE
                 = new KmsDecryptionService();
     }
 
     /**
      * Static factory method.
-     * 
+     *
      * @return The KmsDecryptionService singleton.
      */
     public static KmsDecryptionService instance() {
-       return Holder.INSTANCE;
+        return Holder.INSTANCE;
     }
+  
+    private AwsCrypto awsCrypto;
+    private KmsMasterKeyProvider kmsMasterKeyProvider;
 
     /**
      * Private constructor.
      */
     private KmsDecryptionService() {
+        setAwsCrypto();
+        setKmsMasterKeyProvider();
     }
+
+    private AwsCrypto awsCrypto() {
+        return this.awsCrypto;
+    }
+
+    private KmsMasterKeyProvider kmsMasterKeyProvider() {
+        return this.kmsMasterKeyProvider;
+    }
+
+    private void setAwsCrypto() {
+        this.awsCrypto 
+                = new AwsCrypto();
+    }
+
+    private void setKmsMasterKeyProvider() {
+        Region region 
+                = Regions.getCurrentRegion(); 
+
+        String regionName 
+                = (region == null) 
+                        ? null 
+                        : region.getName(); 
+
+        this.kmsMasterKeyProvider 
+                = KmsMasterKeyProvider
+                        .builder()
+                        .withDefaultRegion(
+                                regionName)
+                        .build();
+    } 
 
     /**
      * {@inheritDoc }
@@ -69,25 +106,18 @@ public final class KmsDecryptionService implements DecryptionService {
             final String encryptedFilename, 
             final String decryptedFilename) {
 
-        final KmsMasterKeyProvider provider
-                = new KmsMasterKeyProvider(
-                        new DefaultAWSCredentialsProviderChain());
-
-        final AwsCrypto awsCrypto
-                = new AwsCrypto();
-
         try (final FileInputStream fileInputStream
                 = new FileInputStream(
-                        encryptedFilename);
-
+                        encryptedFilename); 
+                
                 final FileOutputStream fileOutputStream
                         = new FileOutputStream(
                                 decryptedFilename);
 
                 final CryptoInputStream<?> decryptingStream
-                        = awsCrypto
+                        = awsCrypto()
                                 .createDecryptingStream(
-                                        provider, 
+                                        kmsMasterKeyProvider(),
                                         fileInputStream)) {
 
             IOUtils.copy(
@@ -104,9 +134,9 @@ public final class KmsDecryptionService implements DecryptionService {
      */
     @Override
     public void decryptFile(
-            final File encryptedFile, 
+            final File encryptedFile,
             final String decryptedFilename) {
-        
+
         decryptFile(encryptedFile.getAbsolutePath(), decryptedFilename);
     }
 
@@ -115,9 +145,9 @@ public final class KmsDecryptionService implements DecryptionService {
      */
     @Override
     public void decryptFile(
-            final File encryptedFile, 
+            final File encryptedFile,
             final File decryptedFile) {
-        
+
         throw new UnsupportedOperationException("Not supported yet.");
     }
 
@@ -128,21 +158,14 @@ public final class KmsDecryptionService implements DecryptionService {
     public String decryptFile(
             final String encryptedFilename) {
 
-        final KmsMasterKeyProvider provider
-                = new KmsMasterKeyProvider(
-                        new DefaultAWSCredentialsProviderChain());
-
-        final AwsCrypto awsCrypto
-                = new AwsCrypto();
-
         try (final FileInputStream fileInputStream
                 = new FileInputStream(
                         encryptedFilename);
 
                 final CryptoInputStream<?> decryptingStream
-                        = awsCrypto
+                        = awsCrypto()
                                 .createDecryptingStream(
-                                        provider, 
+                                        kmsMasterKeyProvider(),
                                         fileInputStream)) {
 
             return IOUtils.toString(
@@ -159,7 +182,7 @@ public final class KmsDecryptionService implements DecryptionService {
     @Override
     public String decryptFile(
             final File encryptedFile) {
-        
+
         return decryptFile(encryptedFile.getAbsolutePath());
     }
 
@@ -169,7 +192,7 @@ public final class KmsDecryptionService implements DecryptionService {
     @Override
     public String decryptValue(
             final String encryptedValue) {
-        
+
         throw new UnsupportedOperationException("Not supported yet.");
     }
 }
